@@ -1,6 +1,7 @@
-import { Button } from "@/components/ui/button";
-import { ArrowDown } from "lucide-react";
-import Image from "next/image";
+
+import { Button } from "@/components/ui/button"
+import { ArrowDown } from "lucide-react"
+import Image from "next/image"
 
 const AddRepo = () => {
   return (
@@ -17,18 +18,11 @@ const AddRepo = () => {
           className="flex justify-center items-center bg-white group-hover:bg-[#fff8f8] group-hover:border-[#E93F3F] group-hover:text-[#E93F3F] transition-colors duration-300"
           size={"icon"}
         >
-          <ArrowDown
-            size={30}
-            className="transition-transform duration-300 group-hover:translate-y-1"
-          />
+          <ArrowDown size={30} className="transition-transform duration-300 group-hover:translate-y-1" />
         </Button>
         <div className="flex flex-col">
-          <h1 className="text-xl font-bold text-[#e93f3f]">
-            Open Github Repository
-          </h1>
-          <p className="text-sm text-muted-foreground max-w-[220px]">
-            Work with your repositories in our editor
-          </p>
+          <h1 className="text-xl font-bold text-[#e93f3f]">Open Github Repository</h1>
+          <p className="text-sm text-muted-foreground max-w-[220px]">Work with your repositories in our editor</p>
         </div>
       </div>
 
@@ -42,7 +36,9 @@ const AddRepo = () => {
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddRepo;
+export default AddRepo
+
+

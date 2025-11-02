@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { Project } from "../types";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -53,8 +53,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
-import { duplicateProjectById } from "../actions";
-import MarkedToggleButton from "./marked-toggle";
+import { MarkedToggleButton } from "./marked-toggle";
 
 interface ProjectTableProps {
   projects: Project[];
@@ -64,7 +63,7 @@ interface ProjectTableProps {
   ) => Promise<void>;
   onDeleteProject?: (id: string) => Promise<void>;
   onDuplicateProject?: (id: string) => Promise<void>;
-  onMarkasFavorite?: (id: string) => Promise<void>;
+  
 }
 
 interface EditProjectData {
@@ -77,7 +76,7 @@ export default function ProjectTable({
   onUpdateProject,
   onDeleteProject,
   onDuplicateProject,
-  onMarkasFavorite,
+
 }: ProjectTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -87,7 +86,7 @@ export default function ProjectTable({
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [favoutrie, setFavourite] = useState(false);
+ 
 
   const handleEditClick = (project: Project) => {
     setSelectedProject(project);
@@ -114,8 +113,8 @@ export default function ProjectTable({
       setEditDialogOpen(false);
       toast.success("Project updated successfully");
     } catch (error) {
-      toast.error("Failed to update the project");
-      console.log(error);
+      toast.error("Failed to update project");
+      console.error("Error updating project:", error);
     } finally {
       setIsLoading(false);
     }
@@ -129,15 +128,14 @@ export default function ProjectTable({
     if (!selectedProject || !onDeleteProject) return;
 
     setIsLoading(true);
-
     try {
       await onDeleteProject(selectedProject.id);
       setDeleteDialogOpen(false);
       setSelectedProject(null);
       toast.success("Project deleted successfully");
     } catch (error) {
-      toast.error("Unable to delete the project");
-      console.log(error);
+      toast.error("Failed to delete project");
+      console.error("Error deleting project:", error);
     } finally {
       setIsLoading(false);
     }
@@ -148,11 +146,11 @@ export default function ProjectTable({
 
     setIsLoading(true);
     try {
-      await duplicateProjectById(project.id);
-      toast.success("Project duplicated Successfully");
+      await onDuplicateProject(project.id);
+      toast.success("Project duplicated successfully");
     } catch (error) {
-      toast.error("Failed to duplicate the project");
-      console.log(error);
+      toast.error("Failed to duplicate project");
+      console.error("Error duplicating project:", error);
     } finally {
       setIsLoading(false);
     }
@@ -161,7 +159,7 @@ export default function ProjectTable({
   const copyProjectUrl = (projectId: string) => {
     const url = `${window.location.origin}/playground/${projectId}`;
     navigator.clipboard.writeText(url);
-    toast.success("Project url copied to the clipboard");
+    toast.success("Project url copied to clipboard");
   };
 
   return (
@@ -202,7 +200,9 @@ export default function ProjectTable({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  {format(new Date(project.createdAt), "MMM d, yyyy")}
+                  <span className="text-sm text-gray-500">
+                    {format(new Date(project.createdAt), "MMM dd, yyyy")}
+                  </span>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -228,10 +228,7 @@ export default function ProjectTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>
-                        <MarkedToggleButton
-                          // markedForRevision={project.Starmark[0]?.isMarked}
-                          // id={project.id}
-                        />
+                        <MarkedToggleButton markedForRevision={project.Starmark[0]?.isMarked} id={project.id} />
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
@@ -294,7 +291,7 @@ export default function ProjectTable({
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
             <DialogDescription>
-              Make changes to your project details here. Click save when you are
+              Make changes to your project details here. Click save when you're
               done.
             </DialogDescription>
           </DialogHeader>
@@ -352,7 +349,7 @@ export default function ProjectTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete `&{selectedProject?.title}`? This
+              Are you sure you want to delete "{selectedProject?.title}"? This
               action cannot be undone. All files and data associated with this
               project will be permanently removed.
             </AlertDialogDescription>
