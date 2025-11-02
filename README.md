@@ -1,120 +1,122 @@
-# Gray Code Editor
+# 🧠 Gray Code Editor – AI-Powered Web IDE
 
-A modern, web-based code editor built with Next.js and TypeScript, designed for editing, managing and visualizing Gray code sequences (or any binary/bitwise workflows).  
-This project provides a flexible editor interface, plugin architecture and visual tools to work with binary/Gray code conversions, bit-flips and related concepts.
+![Vibecode Editor Thumbnail](public/vibe-code-editor-thumbnaail.svg)
 
-## Features
+**Gray Code Editor** is a blazing-fast, AI-integrated web IDE built entirely in the browser using **Next.js App Router**, **WebContainers**, **Monaco Editor**, and **local LLMs via Ollama**. It offers real-time code execution, an AI-powered chat assistant, and support for multiple tech stacks — all wrapped in a stunning developer-first UI.
 
-- Interactive editor UI built with Next.js + TypeScript.  
-- Real-time Gray code ↔ binary conversion with live preview.  
-- Bit-flip visualization: highlight transitions between successive Gray codes.  
-- Syntax-highlighted code editor area (supports multiple languages but optimised for binary/bit-level workflows).  
-- Plugin module structure: extend conversion logic, add custom visualisations, support alternative encodings (e.g., Gray code variants, reflected/unreflected).  
-- Responsive UI, deployable to modern front-end hosting (e.g., Vercel).
+---
 
-## Getting Started
+## 🚀 Features
 
-### Prerequisites
+- 🔐 **OAuth Login with NextAuth** – Supports Google & GitHub login.
+- 🎨 **Modern UI** – Built with TailwindCSS & ShadCN UI.
+- 🌗 **Dark/Light Mode** – Seamlessly toggle between themes.
+- 🧱 **Project Templates** – Choose from React, Next.js, Express, Hono, Vue, or Angular.
+- 🗂️ **Custom File Explorer** – Create, rename, delete, and manage files/folders easily.
+- 🖊️ **Enhanced Monaco Editor** – Syntax highlighting, formatting, keybindings, and AI autocomplete.
+- 💡 **AI Suggestions with Ollama** – Local models give you code completion on `Ctrl + Space` or double `Enter`. Accept with `Tab`.
+- ⚙️ **WebContainers Integration** – Instantly run frontend/backend apps right in the browser.
+- 💻 **Terminal with xterm.js** – Fully interactive embedded terminal experience.
+- 🤖 **AI Chat Assistant** – Share files with the AI and get help, refactors, or explanations.
 
-- Node.js (v16 or higher recommended)  
-- npm or yarn (or pnpm)  
+---
 
-### Installation
+## 🧱 Tech Stack
+
+| Layer         | Technology                                   |
+|---------------|----------------------------------------------|
+| Framework     | Next.js 15 (App Router)                      |
+| Styling       | TailwindCSS, ShadCN UI                       |
+| Language      | TypeScript                                   |
+| Auth          | NextAuth (Google + GitHub OAuth)             |
+| Editor        | Monaco Editor                                |
+| AI Suggestion | Ollama (LLMs running locally via Docker)     |
+| Runtime       | WebContainers                                |
+| Terminal      | xterm.js                                     |
+| Database      | MongoDB (via DATABASE_URL)                   |
+
+---
+
+## 🛠️ Getting Started
+
+### 1. Clone the Repo
 
 ```bash
 git clone https://github.com/ZatChBELL0/gray-code-editor.git
 cd gray-code-editor
+````
+
+### 2. Install Dependencies
+
+```bash
 npm install
-# or
-yarn
-# or
-pnpm install
 ```
 
-### Running Locally
+### 3. Set Up Environment Variables
+
+Create a `.env.local` file using the template:
+
+```bash
+cp .env.example .env.local
+```
+
+Then, fill in your credentials:
+
+```env
+AUTH_SECRET=your_auth_secret
+AUTH_GOOGLE_ID=your_google_client_id
+AUTH_GOOGLE_SECRET=your_google_secret
+AUTH_GITHUB_ID=your_github_client_id
+AUTH_GITHUB_SECRET=your_github_secret
+DATABASE_URL=your_mongodb_connection_string
+NEXTAUTH_URL=http://localhost:3000
+```
+
+### 4. Start Local Ollama Model
+
+Make sure [Ollama](https://ollama.com/) and Docker are installed, then run:
+
+```bash
+ollama run codellama
+```
+
+Or use your preferred model that supports code generation.
+
+### 5. Run the Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.  
-Edit `app/page.tsx` or other files under `app/`, `components/`, etc., and the page will auto-reload with your changes.
+Visit `http://localhost:3000` in your browser.
 
-### Building for Production
-
-```bash
-npm run build
-# or
-yarn build
-# or
-pnpm build
-```
-
-Then run:
-
-```bash
-npm run start
-# or
-yarn start
-# or
-pnpm start
-```
-
-## Folder Structure
-
-```
-.
-├── app/                # Next.js App directory (pages/layouts/components)
-├── components/         # Shared UI components
-├── hooks/              # Custom React hooks
-├── lib/                # Utility libraries (conversion logic, bit-flip tools)
-├── modules/            # Feature modules (e.g., Gray code variant modules)
-├── prisma/             # (Optional) Prisma setup if using a database
-├── public/             # Static assets
-├── styles/             # Global and module styles (if applicable)
-├── package.json
-├── next.config.ts
-├── tsconfig.json
-└── README.md
-```
-
-## Usage
-
-1. Navigate to the editor page.  
-2. Enter a binary number or a Gray code sequence.  
-3. The conversion engine will compute the corresponding Gray code or binary.  
-4. Visualise the transitions (bit flips) between successive codes.  
-5. Use modules/plugins to customize the workflow or add new encodings.
-
-## Contributing
-
-Contributions are welcome! If you’d like to:
-
-- Add new encoding variants (e.g., non-reflected Gray code, n-ary Gray codes)  
-- Improve UI/UX (themes, dark mode, accessibility)  
-- Improve performance or refactor code  
-- Add tests and CI workflows
-
-Please:
-
-1. Fork the repository  
-2. Create a new branch (e.g., `feature/my-feature`)  
-3. Make your changes and commit with clear messages  
-4. Submit a pull request, describing your change and why it’s useful
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## About
-
-Built by [ZatChBELL0](https://github.com/ZatChBELL0).  
-If you’d like to explore or use this editor in your own workflow (for education, digital logic design, bit-level simulations, etc.), feel free to fork or adapt/customise.
 
 ---
 
-*Happy coding and happy bit-flipping!* 🧮  
+## 🎯 Keyboard Shortcuts
+
+* `Ctrl + Space` or `Double Enter`: Trigger AI suggestions
+* `Tab`: Accept AI suggestion
+* `/`: Open Command Palette (if implemented)
+
+---
+
+
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🙏 Acknowledgements
+
+* [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+* [Ollama](https://ollama.com/) – for offline LLMs
+* [WebContainers](https://webcontainers.io/)
+* [xterm.js](https://xtermjs.org/)
+* [NextAuth.js](https://next-auth.js.org/)
+
+```
