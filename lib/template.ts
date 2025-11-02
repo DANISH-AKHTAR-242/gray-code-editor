@@ -1,8 +1,8 @@
 export const templatePaths = {
-  REACT: "/gray-code-starters/react-ts",
-  NEXTJS: "/gray-code-starters/nextjs-new",
-  EXPRESS: "/gray-code-starters/express-simple",
-  VUE: "/gray-code-starters/vue",
-  HONO: "/gray-code-starters/hono-nodejs-starter",
-  ANGULAR: "/gray-code-starters/angular",
+  REACT: "/vibecode-starters/react-ts",
+  NEXTJS: "/vibecode-starters/nextjs-new",
+  EXPRESS: "/vibecode-starters/express-simple",
+  VUE: "/vibecode-starters/vue",
+  HONO: "/vibecode-starters/hono-nodejs-starter",
+  ANGULAR: "/vibecode-starters/angular",
 };

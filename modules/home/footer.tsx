@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Github as LucideGithub } from "lucide-react";
 
+
+
+
 export function Footer() {
   const socialLinks = [
     {

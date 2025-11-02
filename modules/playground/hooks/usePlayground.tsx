@@ -36,7 +36,7 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
 
       const data = await getPlaygroundById(id);
 
-        // @ts
+      //   @ts-ignore
       setPlaygroundData(data);
       const rawContent = data?.templateFiles?.[0]?.content;
 
@@ -78,26 +78,26 @@ export const usePlayground = (id: string): UsePlaygroundReturn => {
     }
   }, [id]);
 
-  const saveTemplateData = useCallback(
-    async (data: TemplateFolder) => {
-      try {
-        await SaveUpdatedCode(id, data);
-        setTemplateData(data);
-        toast.success("Changes saved successfully");
-      } catch (error) {
-        console.error("Error saving template data:", error);
-        toast.error("Failed to save changes");
-        throw error;
-      }
-    },
-    [id]
-  );
 
-  useEffect(() => {
-    loadPlayground();
-  }, [loadPlayground]);
 
-  return {
+  const saveTemplateData = useCallback(async(data:TemplateFolder)=>{
+    try {
+          await SaveUpdatedCode(id, data);
+      setTemplateData(data);
+      toast.success("Changes saved successfully");
+    } catch (error) {
+         console.error("Error saving template data:", error);
+      toast.error("Failed to save changes");
+      throw error;
+    }
+  },[id])
+
+
+  useEffect(()=>{
+    loadPlayground()
+  },[loadPlayground])
+
+    return {
     playgroundData,
     templateData,
     isLoading,

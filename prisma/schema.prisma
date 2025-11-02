@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/client"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -21,41 +20,40 @@ enum UserRole {
 }
 
 model User {
-  id        String   @id @default(cuid()) @map("_id") @db.ObjectId
-  email     String   @unique
-  name      String?
-  image     String?
-  accounts  Account[]
-  role UserRole @default(USER)
+  id       String    @id @default(cuid()) @map("_id")
+  name     String?
+  email    String    @unique
+  image    String?
+  accounts Account[]
+  role     UserRole  @default(USER)
 
-myPlayground Playground[]
-staredPlayground StarMark[]
-chatMessages ChatMessage[]
-
+  myPlaground Playground[]
+  staredPlayground StarMark[]
+  chatMessages ChatMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Account {
-  id String @id @default(cuid()) @map("_id") @db.ObjectId
-  userId String @map("user_id") @db.ObjectId
-  type String
-  provider String
+  id                String  @id @default(cuid()) @map("_id")
+  userId            String  @map("user_id")
+  type              String
+  provider          String
   providerAccountId String
-  refreshToken String? @map("refresh_token")
-  accessToken String? @map("access_token")
-  expires_at Int? @map("expires_at")
-  tokenType String? @map("token_type")
-  scope String?
-  idToken String? @map("id_token")
-  sessionState String? @map("session_state")
+  refreshToken      String? @map("refresh_token")
+  accessToken       String? @map("access_token")
+  expiresAt         Int?    @map("expires_at")
+  tokenType         String? @map("token_type")
+  scope             String?
+  idToken           String? @map("id_token")
+  sessionState      String? @map("session_state")
 
-  user User @relation(fields:[userId], references:[id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
- }
+}
 
 enum Templates {
   REACT
@@ -65,41 +63,43 @@ enum Templates {
   HONO
   ANGULAR
 }
-
 model Playground {
-  id String @id @default(cuid()) @map("_id")
-  title String
+  id  String @id @default(cuid()) @map("_id")
+  title  String
   description String?
-  templates Templates @default(REACT)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Starmark StarMark[]
-  userId String
-  user User @relation(fields: [userId], references:[id], onDelete:Cascade)
+  template   Templates  @default(REACT)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime @updatedAt
+ 
+ Starmark   StarMark[]
+  userId  String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   templateFiles TemplateFile[]
 }
 
+
 model StarMark {
-  id String @id @default(cuid()) @map("_id")
+  id  String @id @default(cuid()) @map("_id")
   userId String
   playgroundId String
-  isMarked String
-  createdAt DateTime @default(now())
-  user User @relation(fields: [userId], references:[id], onDelete:Cascade)
-  playground Playground @relation(fields: [playgroundId], references:[id], onDelete:Cascade)
+  isMarked  Boolean
+  createdAt  DateTime  @default(now())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
 
-@@unique ([userId, playgroundId])
+  @@unique([userId , playgroundId])
 }
 
 model TemplateFile {
-  id String @id @default(cuid()) @map("_id")
+  id  String @id @default(cuid()) @map("_id")
   content Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime @updatedAt
   playgroundId String @unique
-  playground Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
-
+  playground   Playground @relation(fields: [playgroundId], references: [id], onDelete: Cascade)
 }
+
 
 model ChatMessage {
   id  String @id @default(cuid()) @map("_id")
