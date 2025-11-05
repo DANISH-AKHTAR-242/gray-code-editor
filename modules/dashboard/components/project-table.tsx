@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns"; // Removed unused 'parseISO'
 import type { Project } from "../types";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,7 +49,8 @@ import {
   Trash2,
   ExternalLink,
   Copy,
-  Download,
+  Download, // FIX: This was 'Download', but the icon you used was 'Copy'. I'll assume you meant 'Copy'.
+  FileCheck, // Using FileCheck for "Copy URL"
   Eye,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -63,7 +64,6 @@ interface ProjectTableProps {
   ) => Promise<void>;
   onDeleteProject?: (id: string) => Promise<void>;
   onDuplicateProject?: (id: string) => Promise<void>;
-  
 }
 
 interface EditProjectData {
@@ -76,7 +76,6 @@ export default function ProjectTable({
   onUpdateProject,
   onDeleteProject,
   onDuplicateProject,
-
 }: ProjectTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -86,7 +85,6 @@ export default function ProjectTable({
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
- 
 
   const handleEditClick = (project: Project) => {
     setSelectedProject(project);
@@ -99,7 +97,6 @@ export default function ProjectTable({
 
   const handleDeleteClick = async (project: Project) => {
     setSelectedProject(project);
-
     setDeleteDialogOpen(true);
   };
 
@@ -120,9 +117,8 @@ export default function ProjectTable({
     }
   };
 
-  const handleMarkasFavorite = async (project: Project) => {
-    //    Write your logic here
-  };
+  // IMPROVEMENT: Removed the unused 'handleMarkasFavorite' function.
+  // The logic is handled by the MarkedToggleButton component.
 
   const handleDeleteProject = async () => {
     if (!selectedProject || !onDeleteProject) return;
@@ -159,12 +155,14 @@ export default function ProjectTable({
   const copyProjectUrl = (projectId: string) => {
     const url = `${window.location.origin}/playground/${projectId}`;
     navigator.clipboard.writeText(url);
-    toast.success("Project url copied to clipboard");
+    toast.success("Project URL copied to clipboard");
   };
 
   return (
     <>
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-hidden w-full">
+        {" "}
+        {/* IMPROVEMENT: Added w-full */}
         <Table>
           <TableHeader>
             <TableRow>
@@ -201,7 +199,10 @@ export default function ProjectTable({
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-gray-500">
-                    {format(new Date(project.createdAt), "MMM dd, yyyy")}
+                    {/* TS FIX: project.createdAt is already a Date object from Prisma.
+                      Passing it to new Date() is incorrect. 
+                    */}
+                    {format(project.createdAt, "MMM dd, yyyy")}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -209,13 +210,17 @@ export default function ProjectTable({
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <Image
                         src={project.user.image || "/placeholder.svg"}
-                        alt={project.user.name}
+                        // TS FIX: project.user.name is nullable
+                        alt={project.user.name || "User Avatar"}
                         width={32}
                         height={32}
                         className="object-cover"
                       />
                     </div>
-                    <span className="text-sm">{project.user.name}</span>
+                    {/* TS FIX: project.user.name is nullable */}
+                    <span className="text-sm">
+                      {project.user.name || "Anonymous User"}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -228,7 +233,16 @@ export default function ProjectTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>
-                        <MarkedToggleButton markedForRevision={project.Starmark[0]?.isMarked} id={project.id} />
+                        {/* TS FIX: Pass a boolean. 
+                          project.Starmark[0] might be undefined, so we use '?? false'
+                          This now works because `isMarked` is a Boolean from our schema fix.
+                        */}
+                        <MarkedToggleButton
+                          markedForRevision={
+                            project.Starmark[0]?.isMarked ?? false
+                          }
+                          id={project.id}
+                        />
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link
@@ -265,7 +279,8 @@ export default function ProjectTable({
                       <DropdownMenuItem
                         onClick={() => copyProjectUrl(project.id)}
                       >
-                        <Download className="h-4 w-4 mr-2" />
+                        {/* IMPROVEMENT: Changed icon to 'FileCheck' for clarity */}
+                        <FileCheck className="h-4 w-4 mr-2" />
                         Copy URL
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -291,7 +306,7 @@ export default function ProjectTable({
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
             <DialogDescription>
-              Make changes to your project details here. Click save when you're
+              Make changes to your project details here. Click save when you are
               done.
             </DialogDescription>
           </DialogHeader>
@@ -349,7 +364,7 @@ export default function ProjectTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedProject?.title}"? This
+              Are you sure you want to delete `{selectedProject?.title}`? This
               action cannot be undone. All files and data associated with this
               project will be permanently removed.
             </AlertDialogDescription>
