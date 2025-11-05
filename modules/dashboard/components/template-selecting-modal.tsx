@@ -23,11 +23,11 @@ import {
   Clock,
   Check,
   Plus,
+  Loader2, // ADDED: For loading spinner
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
-// TemplateSelectionModal.tsx
 type TemplateSelectionModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -36,6 +36,7 @@ type TemplateSelectionModalProps = {
     template: "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
     description?: string;
   }) => void;
+  isSubmitting?: boolean; // ADDED: Prop for loading state
 };
 
 interface TemplateOption {
@@ -50,13 +51,14 @@ interface TemplateOption {
   category: "frontend" | "backend" | "fullstack";
 }
 
+// FIX: Updated icon paths to use assets from the /public folder
 const templates: TemplateOption[] = [
   {
     id: "react",
     name: "React",
     description:
       "A JavaScript library for building user interfaces with component-based architecture",
-    icon: "/react.svg",
+    icon: "/file.svg", // FIX: Was "/react.svg" (not found)
     color: "#61DAFB",
     popularity: 5,
     tags: ["UI", "Frontend", "JavaScript"],
@@ -68,7 +70,7 @@ const templates: TemplateOption[] = [
     name: "Next.js",
     description:
       "The React framework for production with server-side rendering and static site generation",
-    icon: "/nextjs-icon.svg",
+    icon: "/next.svg", // FIX: Was "/nextjs-icon.svg" (not found)
     color: "#000000",
     popularity: 4,
     tags: ["React", "SSR", "Fullstack"],
@@ -80,7 +82,7 @@ const templates: TemplateOption[] = [
     name: "Express",
     description:
       "Fast, unopinionated, minimalist web framework for Node.js to build APIs and web applications",
-    icon: "/expressjs-icon.svg",
+    icon: "/file.svg", // FIX: Was "/expressjs-icon.svg" (not found)
     color: "#000000",
     popularity: 4,
     tags: ["Node.js", "API", "Backend"],
@@ -92,7 +94,7 @@ const templates: TemplateOption[] = [
     name: "Vue.js",
     description:
       "Progressive JavaScript framework for building user interfaces with an approachable learning curve",
-    icon: "/vuejs-icon.svg",
+    icon: "/file.svg", // FIX: Was "/vuejs-icon.svg" (not found)
     color: "#4FC08D",
     popularity: 4,
     tags: ["UI", "Frontend", "JavaScript"],
@@ -104,7 +106,7 @@ const templates: TemplateOption[] = [
     name: "Hono",
     description:
       "Fast, lightweight, built on Web Standards. Support for any JavaScript runtime.",
-    icon: "/hono.svg",
+    icon: "/file.svg", // FIX: Was "/hono.svg" (not found)
     color: "#e36002",
     popularity: 3,
     tags: ["Node.js", "TypeScript", "Backend"],
@@ -120,10 +122,10 @@ const templates: TemplateOption[] = [
     name: "Angular",
     description:
       "Angular is a web framework that empowers developers to build fast, reliable applications.",
-    icon: "/angular-2.svg",
+    icon: "/file.svg", // FIX: Was "/angular-2.svg" (not found)
     color: "#DD0031",
     popularity: 3,
-    tags: ["React", "Fullstack", "JavaScript"],
+    tags: ["Fullstack", "JavaScript", "TypeScript"], // FIX: Removed "React" tag
     features: [
       "Reactive Data Binding",
       "Component System",
@@ -139,6 +141,7 @@ const TemplateSelectionModal = ({
   isOpen,
   onClose,
   onSubmit,
+  isSubmitting = false, // ADDED: Default value for prop
 }: TemplateSelectionModalProps) => {
   const [step, setStep] = useState<"select" | "configure">("select");
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -163,6 +166,7 @@ const TemplateSelectionModal = ({
   });
 
   const handleSelectTemplate = (templateId: string) => {
+    if (isSubmitting) return; // Prevent selection while submitting
     setSelectedTemplate(templateId);
   };
 
@@ -173,7 +177,8 @@ const TemplateSelectionModal = ({
   };
 
   const handleCreateProject = () => {
-    if (selectedTemplate) {
+    if (selectedTemplate && !isSubmitting) {
+      // FIX: Check for isSubmitting
       const templateMap: Record<
         string,
         "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR"
@@ -188,15 +193,11 @@ const TemplateSelectionModal = ({
 
       const template = templates.find((t) => t.id === selectedTemplate);
       onSubmit({
-        title:projectName || `New ${template?.name} Project`,
-        template:templateMap[selectedTemplate] || "REACT",
-        description:template?.description
-      })
-      onClose();
-      // Reset state for next time
-      setStep("select");
-      setSelectedTemplate(null);
-      setProjectName("");
+        title: projectName || `New ${template?.name} Project`,
+        template: templateMap[selectedTemplate] || "REACT",
+        description: template?.description,
+      });
+      // Don't close modal here, let parent decide
     }
   };
 
@@ -222,7 +223,8 @@ const TemplateSelectionModal = ({
     <Dialog
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) {
+        if (!open && !isSubmitting) {
+          // FIX: Prevent closing while submitting
           onClose();
           // Reset state when closing
           setStep("select");
@@ -256,19 +258,37 @@ const TemplateSelectionModal = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
+                    disabled={isSubmitting} // ADDED
                   />
                 </div>
 
                 <Tabs
                   defaultValue="all"
                   className="w-full sm:w-auto"
-                  onValueChange={(value) => setCategory(value as any)}
+                  
+                  onValueChange={(value) => setCategory(value as typeof category)}
                 >
                   <TabsList className="grid grid-cols-4 w-full sm:w-[400px]">
-                    <TabsTrigger value="all">All</TabsTrigger>
-                    <TabsTrigger value="frontend">Frontend</TabsTrigger>
-                    <TabsTrigger value="backend">Backend</TabsTrigger>
-                    <TabsTrigger value="fullstack">Fullstack</TabsTrigger>
+                    <TabsTrigger value="all" disabled={isSubmitting}>
+                      {" "}
+                      {/* ADDED */}
+                      All
+                    </TabsTrigger>
+                    <TabsTrigger value="frontend" disabled={isSubmitting}>
+                      {" "}
+                      {/* ADDED */}
+                      Frontend
+                    </TabsTrigger>
+                    <TabsTrigger value="backend" disabled={isSubmitting}>
+                      {" "}
+                      {/* ADDED */}
+                      Backend
+                    </TabsTrigger>
+                    <TabsTrigger value="fullstack" disabled={isSubmitting}>
+                      {" "}
+                      {/* ADDED */}
+                      Fullstack
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>
@@ -276,6 +296,7 @@ const TemplateSelectionModal = ({
               <RadioGroup
                 value={selectedTemplate || ""}
                 onValueChange={handleSelectTemplate}
+                disabled={isSubmitting} // ADDED
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredTemplates.length > 0 ? (
@@ -288,7 +309,7 @@ const TemplateSelectionModal = ({
                               ? "border-[#E93F3F]  shadow-[0_0_0_1px_#E93F3F,0_8px_20px_rgba(233,63,63,0.15)]"
                               : "hover:border-[#E93F3F] shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
                           }
-                          
+                          ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}
                           `}
                         onClick={() => handleSelectTemplate(template.id)}
                       >
@@ -304,11 +325,11 @@ const TemplateSelectionModal = ({
 
                         <div className="flex gap-4">
                           <div
-                            className="relative w-16 h-16 flex-shrink-0 flex items-center justify-center rounded-full"
+                            className="relative w-16 h-16 shrink-0 flex items-center justify-center rounded-full"
                             style={{ backgroundColor: `${template.color}15` }}
                           >
                             <Image
-                              src={template.icon || "/placeholder.svg"}
+                              src={template.icon || "/file.svg"} // FIX: Default placeholder
                               alt={`${template.name} icon`}
                               width={40}
                               height={40}
@@ -388,12 +409,16 @@ const TemplateSelectionModal = ({
                 </span>
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" onClick={onClose}>
+                <Button
+                  variant="outline"
+                  onClick={onClose}
+                  disabled={isSubmitting} // ADDED
+                >
                   Cancel
                 </Button>
                 <Button
                   className="bg-[#E93F3F] hover:bg-[#d03636] text-white"
-                  disabled={!selectedTemplate}
+                  disabled={!selectedTemplate || isSubmitting} // UPDATED
                   onClick={handleContinue}
                 >
                   Continue <ChevronRight size={16} className="ml-1" />
@@ -421,6 +446,7 @@ const TemplateSelectionModal = ({
                   placeholder="my-awesome-project"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
+                  disabled={isSubmitting} // ADDED
                 />
               </div>
 
@@ -440,14 +466,23 @@ const TemplateSelectionModal = ({
             </div>
 
             <div className="flex justify-between gap-3 mt-4 pt-4 border-t">
-              <Button variant="outline" onClick={handleBack}>
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting} // ADDED
+              >
                 Back
               </Button>
               <Button
-                className="bg-[#E93F3F] hover:bg-[#d03636] text-white"
+                className="bg-[#E93F3F] hover:bg-[#d03636] text-white w-36" // Added fixed width
                 onClick={handleCreateProject}
+                disabled={isSubmitting} // UPDATED
               >
-                Create Project
+                {/* ADDED: Loading state */}
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isSubmitting ? "Creating..." : "Create Project"}
               </Button>
             </div>
           </>

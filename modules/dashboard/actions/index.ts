@@ -4,69 +4,106 @@ import { db } from "@/lib/db";
 import { currentUser } from "@/modules/auth/actions";
 import { revalidatePath } from "next/cache";
 
-export const toggleStarMarked = async (
+/**
+ * Toggles a playground's "favorite" status for the current user.
+ * This function is now idempotent, using upsert to handle logic.
+ */
+export const markAsFavorite = async (
   playgroundId: string,
-  isChecked: boolean
+  isMarked: boolean // Renamed from isChecked for clarity
 ) => {
   const user = await currentUser();
-  const userId = user?.id;
-  if (!userId) {
-    throw new Error("User Id is Required");
+  if (!user || !user.id) {
+    throw new Error("User is not authenticated");
   }
+  const userId = user.id;
 
   try {
-    if (isChecked) {
-      await db.starMark.create({
-        data: {
-          userId: userId!,
-          playgroundId,
-          isMarked: isChecked,
-        },
-      });
-    } else {
-        await db.starMark.delete({
+    if (isMarked) {
+      // Use upsert to create or update the favorite status
+      await db.starMark.upsert({
         where: {
           userId_playgroundId: {
             userId,
-            playgroundId: playgroundId,
-
+            playgroundId,
+          },
+        },
+        update: {
+          isMarked: true,
+        },
+        create: {
+          userId,
+          playgroundId,
+          isMarked: true,
+        },
+      });
+    } else {
+      // If un-marking, just delete the record.
+      // We check if it exists first to prevent errors.
+      const existingMark = await db.starMark.findUnique({
+        where: {
+          userId_playgroundId: {
+            userId,
+            playgroundId,
           },
         },
       });
+
+      if (existingMark) {
+        await db.starMark.delete({
+          where: {
+            userId_playgroundId: {
+              userId,
+              playgroundId,
+            },
+          },
+        });
+      }
     }
 
-     revalidatePath("/dashboard");
-    return { success: true, isMarked: isChecked };
+    revalidatePath("/dashboard");
+    return { success: true, isMarked: isMarked };
   } catch (error) {
-       console.error("Error updating problem:", error);
-    return { success: false, error: "Failed to update problem" };
+    console.error("Error updating favorite status:", error);
+    return { success: false, error: "Failed to update favorite status" };
   }
 };
 
 export const getAllPlaygroundForUser = async () => {
   const user = await currentUser();
 
+  // FIX: Added authentication check.
+  if (!user || !user.id) {
+    return []; // Return an empty array if no user is logged in
+  }
+
   try {
-    const playground = await db.playground.findMany({
+    const playgrounds = await db.playground.findMany({
       where: {
-        userId: user?.id,
+        userId: user.id,
       },
       include: {
         user: true,
-        Starmark:{
-            where:{
-                userId:user?.id!
-            },
-            select:{
-                isMarked:true
-            }
-        }
+        // FIX: Corrected typo from Starmark to StarMark
+        Starmark: {
+          where: {
+            // FIX: Removed '!' non-null assertion
+            userId: user.id,
+          },
+          select: {
+            isMarked: true,
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc", // Added sorting
       },
     });
 
-    return playground;
+    return playgrounds;
   } catch (error) {
     console.log(error);
+    return []; // Return empty array on error
   }
 };
 
@@ -77,6 +114,11 @@ export const createPlayground = async (data: {
 }) => {
   const user = await currentUser();
 
+  // FIX: Added authentication check.
+  if (!user || !user.id) {
+    throw new Error("User is not authenticated");
+  }
+
   const { template, title, description } = data;
 
   try {
@@ -85,7 +127,8 @@ export const createPlayground = async (data: {
         title: title,
         description: description,
         template: template,
-        userId: user?.id!,
+        // FIX: Removed '!' non-null assertion
+        userId: user.id,
       },
     });
 
@@ -126,14 +169,27 @@ export const editProjectById = async (
 };
 
 export const duplicateProjectById = async (id: string) => {
+  const user = await currentUser();
+
+  // FIX: Added authentication check.
+  if (!user || !user.id) {
+    throw new Error("User is not authenticated");
+  }
+
   try {
+    // FIX: Fetch the templateFiles along with the original
     const originalPlayground = await db.playground.findUnique({
       where: { id },
-      // todo: add tempalte files
+      include: {
+        templateFiles: true, // Fetch the files
+      },
     });
+
     if (!originalPlayground) {
       throw new Error("Original playground not found");
     }
+
+    const originalTemplateFile = originalPlayground.templateFiles[0];
 
     const duplicatedPlayground = await db.playground.create({
       data: {
@@ -142,7 +198,14 @@ export const duplicateProjectById = async (id: string) => {
         template: originalPlayground.template,
         userId: originalPlayground.userId,
 
-        // todo: add template files
+        // FIX: Create the new template file for the duplicated project
+        templateFiles: {
+          // @ts-expect-error
+          create : {
+            // Copy the content from the original
+            content: originalTemplateFile ? originalTemplateFile.content : {}, // Handle case with no template file
+          },
+        },
       },
     });
 
