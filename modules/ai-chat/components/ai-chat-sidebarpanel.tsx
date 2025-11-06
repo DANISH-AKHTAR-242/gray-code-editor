@@ -107,14 +107,6 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
 type ChatMode = "chat" | "review" | "fix" | "optimize";
 
 
-/*************  ✨ Windsurf Command ⭐  *************/
-/**
- * Enhanced AI Assistant side panel component.
- *
- * @param isOpen Whether the panel is currently open.
- * @param onClose The function to call when the panel is closed.
- */
-/*******  3dab5a1e-a3ea-4aac-a919-a02e0f417133  *******/
 export const AIChatSidePanel: React.FC<AIChatSidePanelProps> = ({
   isOpen,
   onClose,

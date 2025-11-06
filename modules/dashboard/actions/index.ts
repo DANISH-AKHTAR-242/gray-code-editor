@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { currentUser } from "@/modules/auth/actions";
 import { revalidatePath } from "next/cache";
+// import { InputJsonValue } from "../path/to/InputJsonValue";
 
 /**
  * Toggles a playground's "favorite" status for the current user.
@@ -190,6 +191,7 @@ export const duplicateProjectById = async (id: string) => {
     }
 
     const originalTemplateFile = originalPlayground.templateFiles[0];
+    
 
     const duplicatedPlayground = await db.playground.create({
       data: {
@@ -200,10 +202,10 @@ export const duplicateProjectById = async (id: string) => {
 
         // FIX: Create the new template file for the duplicated project
         templateFiles: {
-          // @ts-expect-error
+          //@ts-expect-error
           create : {
             // Copy the content from the original
-            content: originalTemplateFile ? originalTemplateFile.content : {}, // Handle case with no template file
+            content: originalTemplateFile ? originalTemplateFile.content :  undefined, // Handle case with no template file
           },
         },
       },
