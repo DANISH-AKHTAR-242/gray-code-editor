@@ -7,7 +7,8 @@ import { Progress } from "@/components/ui/progress";
 
 import { WebContainer } from "@webcontainer/api";
 import { TemplateFolder } from "@/modules/playground/lib/path-to-json";
-import TerminalComponent from "./terminal";
+// FIX: Import the component AND its ref interface
+import TerminalComponent, { type TerminalRef } from "./terminal";
 
 interface WebContainerPreviewProps {
   templateData: TemplateFolder;
@@ -41,7 +42,8 @@ const WebContainerPreview = ({
   const [isSetupComplete, setIsSetupComplete] = useState(false);
   const [isSetupInProgress, setIsSetupInProgress] = useState(false);
 
-  const terminalRef = useRef<any>(null);
+  // FIX: Use the imported TerminalRef type instead of 'any'
+  const terminalRef = useRef<TerminalRef>(null);
 
   // Reset setup state when forceResetup changes
   useEffect(() => {
@@ -99,14 +101,21 @@ const WebContainerPreview = ({
 
             setCurrentStep(4);
             setLoadingState((prev) => ({ ...prev, starting: true }));
+
+            // --- FIX: START ---
+            // Set setup state to complete to prevent infinite loop
+            setIsSetupComplete(true);
+            setIsSetupInProgress(false);
+            // --- FIX: END ---
             return;
           }
-        } catch (error) {}
+        } catch (error) {
+          // This catch is expected if package.json doesn't exist, so we continue.
+        }
 
         // Step-1 transform data
         setLoadingState((prev) => ({ ...prev, transforming: true }));
         setCurrentStep(1);
-        // Write to terminal
         if (terminalRef.current?.writeToTerminal) {
           terminalRef.current.writeToTerminal(
             "🔄 Transforming template data...\r\n"
@@ -123,7 +132,6 @@ const WebContainerPreview = ({
         setCurrentStep(2);
 
         //  Step-2 Mount Files
-
         if (terminalRef.current?.writeToTerminal) {
           terminalRef.current.writeToTerminal(
             "📁 Mounting files to WebContainer...\r\n"
@@ -144,15 +152,12 @@ const WebContainerPreview = ({
         setCurrentStep(3);
 
         // Step-3 Install dependencies
-
         if (terminalRef.current?.writeToTerminal) {
           terminalRef.current.writeToTerminal(
             "📦 Installing dependencies...\r\n"
           );
         }
-
         const installProcess = await instance.spawn("npm", ["install"]);
-
         installProcess.output.pipeTo(
           new WritableStream({
             write(data) {
@@ -162,7 +167,6 @@ const WebContainerPreview = ({
             },
           })
         );
-
         const installExitCode = await installProcess.exit;
 
         if (installExitCode !== 0) {
@@ -185,13 +189,11 @@ const WebContainerPreview = ({
         setCurrentStep(4);
 
         // STEP-4 Start The Server
-
         if (terminalRef.current?.writeToTerminal) {
           terminalRef.current.writeToTerminal(
             "🚀 Starting development server...\r\n"
           );
         }
-
         const startProcess = await instance.spawn("npm", ["run", "start"]);
 
         instance.on("server-ready", (port: number, url: string) => {
@@ -210,7 +212,6 @@ const WebContainerPreview = ({
           setIsSetupInProgress(false);
         });
 
-        // Handle start process output - stream to terminal
         startProcess.output.pipeTo(
           new WritableStream({
             write(data) {
@@ -241,9 +242,10 @@ const WebContainerPreview = ({
     setupContainer();
   }, [instance, templateData, isSetupComplete, isSetupInProgress]);
 
-  useEffect(() => {
-    return () => {};
-  }, []);
+  // FIX: Removed empty and unnecessary useEffect
+  // useEffect(() => {
+  //   return () => {};
+  // }, []);
 
   if (isLoading) {
     return (
@@ -335,7 +337,7 @@ const WebContainerPreview = ({
           <div className="flex-1 p-4">
             <TerminalComponent
               ref={terminalRef}
-              webContainerInstance={instance}
+              webContainerInstance={instance!}
               theme="dark"
               className="h-full"
             />
@@ -354,7 +356,7 @@ const WebContainerPreview = ({
           <div className="h-64 border-t">
             <TerminalComponent
               ref={terminalRef}
-              webContainerInstance={instance}
+              webContainerInstance={instance!}
               theme="dark"
               className="h-full"
             />
