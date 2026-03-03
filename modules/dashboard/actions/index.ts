@@ -194,7 +194,7 @@ export const duplicateProjectById = async (id: string) => {
     const originalTemplateFile = originalPlayground.templateFiles[0];
     
 
-    const duplicatedPlayground = await db.playground.create({
+    await db.playground.create({
       data: {
         title: `${originalPlayground.title} (Copy)`,
         description: originalPlayground.description,
@@ -212,7 +212,6 @@ export const duplicateProjectById = async (id: string) => {
     });
 
     revalidatePath("/dashboard");
-    void duplicatedPlayground;
   } catch (error) {
     console.error("Error duplicating project:", error);
   }

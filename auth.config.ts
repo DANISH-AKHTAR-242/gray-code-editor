@@ -2,12 +2,14 @@ import GitHub from "next-auth/providers/github"
 import Google from "next-auth/providers/google"
 import type { NextAuthConfig } from "next-auth"
 
-export default{
-    secret:
-        process.env.AUTH_SECRET ??
-        (process.env.NODE_ENV === "production"
-            ? undefined
-            : "local-dev-auth-secret"),
+const authSecret =
+    process.env.AUTH_SECRET ??
+    process.env.NEXTAUTH_SECRET ??
+    globalThis.crypto?.randomUUID?.() ??
+    "local-dev-auth-secret";
+
+export default {
+    secret: authSecret,
     providers:[
         GitHub({
             clientId:process.env.AUTH_GITHUB_ID,
