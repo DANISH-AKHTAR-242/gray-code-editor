@@ -1,4 +1,5 @@
-import { UserRole, Templates } from "@prisma/client";
+type UserRole = "USER" | "ADMIN" | "PREMIUM_USER";
+type Templates = "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
 
 export interface User {
   id: string;
