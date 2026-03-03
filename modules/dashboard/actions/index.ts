@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { currentUser } from "@/modules/auth/actions";
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 // import { InputJsonValue } from "../path/to/InputJsonValue";
 
 /**
@@ -193,7 +194,7 @@ export const duplicateProjectById = async (id: string) => {
     const originalTemplateFile = originalPlayground.templateFiles[0];
     
 
-    const duplicatedPlayground = await db.playground.create({
+    await db.playground.create({
       data: {
         title: `${originalPlayground.title} (Copy)`,
         description: originalPlayground.description,
@@ -202,17 +203,15 @@ export const duplicateProjectById = async (id: string) => {
 
         // FIX: Create the new template file for the duplicated project
         templateFiles: {
-          //@ts-expect-error
           create : {
             // Copy the content from the original
-            content: originalTemplateFile ? originalTemplateFile.content :  undefined, // Handle case with no template file
+            content: (originalTemplateFile?.content ?? {}) as Prisma.InputJsonValue, // Handle case with no template file
           },
         },
       },
     });
 
     revalidatePath("/dashboard");
-    return duplicatedPlayground;
   } catch (error) {
     console.error("Error duplicating project:", error);
   }
